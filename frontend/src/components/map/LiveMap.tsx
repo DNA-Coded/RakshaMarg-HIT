@@ -18,6 +18,7 @@ interface LiveMapProps {
     userLiveLocation: google.maps.LatLngLiteral | null;
     isFullScreen: boolean;
     setIsFullScreen: (isFull: boolean) => void;
+    useMock?: boolean;
 }
 
 const getRiskLabel = (score: number) => {
@@ -41,7 +42,8 @@ const LiveMap: React.FC<LiveMapProps> = ({
     isTracking,
     userLiveLocation,
     isFullScreen,
-    setIsFullScreen
+    setIsFullScreen,
+    useMock = false
 }) => {
     if (showResults && !routeResult) return null;
 
@@ -82,7 +84,9 @@ const LiveMap: React.FC<LiveMapProps> = ({
 
             {/* Map Container */}
             <div className="flex-1 min-h-[400px] relative bg-white/5">
-                {isLoaded && directionsResponse ? (
+                {useMock ? (
+                  <img src="/src/assets/map.png" alt="Mock Map" className="w-full h-full object-cover" />
+                ) : isLoaded && directionsResponse ? (
                     <GoogleMap
                         mapContainerStyle={{ width: '100%', height: '100%' }}
                         zoom={12}

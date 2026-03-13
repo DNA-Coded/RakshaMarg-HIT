@@ -55,6 +55,42 @@ const CheckRoute = () => {
     handleCheckRoute
   } = useRouteSafety();
 
+  // MOCK STATE SETUP
+  const [useMock, setUseMock] = useState(true);
+
+  const mockRouteResult = {
+    safety_score: 85,
+    safetyScore: 85,
+    summary: "Mock Route via Main St",
+    aiCrimeAnalysis: {
+      incidents: [
+        { category: 'Theft', incident_date: '2 Days Ago', description: 'Reported snatching near intersection' }
+      ],
+      derived_risk_summary: {
+        primary_risk_factors: ["Moderate pedestrian traffic at night"]
+      }
+    },
+    emergencySupport: {
+      police: { name: "Central Police Station", address: "123 Main St", formatted_phone_number: "100" },
+      hospital: { name: "City General Hospital", address: "456 Health Ave", formatted_phone_number: "108" }
+    }
+  };
+
+  const mockAllRoutes = [
+    { ...mockRouteResult, route_name: "Mock Route 1", safety_score: 85 },
+    { ...mockRouteResult, route_name: "Mock Route 2", safety_score: 65, safetyScore: 65 }
+  ];
+
+  const effectiveRouteResult = useMock ? mockRouteResult : routeResult;
+  const effectiveAllRoutes = useMock ? mockAllRoutes : allRoutes;
+  const effectiveShowResults = useMock ? true : showResults;
+
+  useEffect(() => {
+    if (showResults) {
+      setUseMock(false);
+    }
+  }, [showResults]);
+
   const [originAutocomplete, setOriginAutocomplete] = useState<any>(null);
   const [destAutocomplete, setDestAutocomplete] = useState<any>(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -240,8 +276,8 @@ const CheckRoute = () => {
       onLoad={onLoad}
       onUnmount={onUnmount}
       directionsResponse={directionsResponse}
-      routeResult={routeResult}
-      showResults={showResults}
+      routeResult={effectiveRouteResult}
+      showResults={effectiveShowResults}
       policeStations={policeStations}
       hospitals={hospitals}
       selectedPlace={selectedPlace}
@@ -250,6 +286,7 @@ const CheckRoute = () => {
       userLiveLocation={userLiveLocation}
       isFullScreen={isFullScreen}
       setIsFullScreen={setIsFullScreen}
+      useMock={useMock}
     />
   );
 
@@ -319,7 +356,7 @@ const CheckRoute = () => {
           </section>
 
           {/* Results Section (Restored Map Layout) */}
-          {showResults && routeResult && (
+          {effectiveShowResults && effectiveRouteResult && (
             <section className={`container px-4 mb-16 scroll-mt-24 ${!isFullScreen ? 'animate-fade-in' : ''}`} id="results">
               <div className="max-w-6xl mx-auto grid lg:grid-cols-5 gap-6">
 
@@ -328,9 +365,12 @@ const CheckRoute = () => {
 
                 {/* Safety Analysis Sidebar */}
                 <SafetyAnalysisReport
-                  routeResult={routeResult}
-                  allRoutes={allRoutes}
-                  setRouteResult={setRouteResult}
+                  routeResult={effectiveRouteResult}
+                  allRoutes={effectiveAllRoutes}
+                  setRouteResult={(route) => {
+                     // If mock is active, update the mock UI briefly or ignore
+                     if(!useMock) setRouteResult(route);
+                  }}
                   trustedContacts={trustedContacts}
                   setShowContactModal={setShowContactModal}
                   isTracking={isTracking}
